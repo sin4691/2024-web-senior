@@ -1,0 +1,19 @@
+
+#container {
+    padding: 30px;
+
+    height: 20px;
+    width: 100%;
+
+    border: 1px solid;
+
+}
+
+.logo {
+    text-align: center;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+}
