@@ -59,5 +59,5 @@ fetch()
 
 
     function newSource() {{
-        // githuv test
+        // github test
     }}
