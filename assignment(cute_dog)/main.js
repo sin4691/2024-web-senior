@@ -13,10 +13,10 @@ let slideCount = slides.length,
     slideCopy = $(".slide:lt("+ showNum +")").clone();
     slideList.append(slideCopy);
 
-//ì´ë¯¸ì§€ ì›€ì§ì´ê¸°
+//ÀÌ¹ÌÁö ¿òÁ÷ÀÌ±â
 function backShow(){
   if( num == 0 ){
-    //ì‹œì‘
+    //½ÃÀÛ
     num= slideCount;
     slideList.css("left", -num * slideWidth + "px");
   }
@@ -26,7 +26,7 @@ function backShow(){
 
 function nextShow(){
   if( num == slideCount ){
-    //ë§ˆì§€ë§‰
+    //¸¶Áö¸·
     num= 0;
     slideList.css("left", num);
   }
@@ -34,13 +34,13 @@ function nextShow(){
   slideList.stop().animate({ left : -slideWidth * num +"px"}, 400);
 }
 
-//ì™¼ìª½, ì˜¤ë¥¸ìª½ ë²„íŠ¼ ì„¤ì •
+//¿ŞÂÊ, ¿À¸¥ÂÊ ¹öÆ° ¼³Á¤
 slideBtn.on("click","button",function(){
   if( $(this).hasClass("prev")){
-    //ì™¼ìª½ ë²„íŠ¼ì„ í´ë¦­
+    //¿ŞÂÊ ¹öÆ°À» Å¬¸¯
     backShow();
   } else {
-    //ì˜¤ë¥¸ìª½ ë²„íŠ¼ì„ í´ë¦­
+    //¿À¸¥ÂÊ ¹öÆ°À» Å¬¸¯
     nextShow();
   }
 });
