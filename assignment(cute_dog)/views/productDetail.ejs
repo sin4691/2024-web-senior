@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= product.name %> 상세 페이지</title>
+    <link rel="stylesheet" href="/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <%- include('../public/header') %>
+    <div class="product-detail" style="width: 100%; height: 500px;">
+        <div style="margin-left: 10%; width: 30%; float: left;">
+            <img src="/images/<%= product.image %>" alt="<%= product.name %>">
+        </div>
+        <div style="width: 30%; float: right;">
+            <h2><%= product.name %></h2>
+            <p>가격: <%= product.price %>원</p>
+            <p>카테고리: <%= product.category %></p>
+            <label for="quantity">수량:</label>
+            <input type="number" id="quantity" value="1" min="1">
+            <button onclick="addToCart(<%= product.id %>, '<%= product.name %>', '/images/<%= product.image %>', <%= product.price %>)">장바구니에 추가</button>
+        </div>
+    </div>
+    <div style="clear:both;"></div>
+
+    <%- include('../public/footer') %>
+    <script>
+        function addToCart(productId, productName, productImage, productPrice) {
+            const quantity = parseInt(document.getElementById('quantity').value);
+            if (isNaN(quantity) || quantity <= 0) {
+                alert('올바른 수량을 입력해주세요.');
+                return;
+            }
+
+            let cart = localStorage.getItem('cart');
+            cart = cart ? JSON.parse(cart) : [];
+
+            const productIndex = cart.findIndex(item => item.id === productId);
+            if (productIndex !== -1) {
+                cart[productIndex].quantity += quantity;
+            } else {
+                cart.push({ id: productId, name: productName, image: productImage, price: productPrice, quantity: quantity });
+            }
+
+            localStorage.setItem('cart', JSON.stringify(cart));
+            alert('장바구니에 추가되었습니다.');
+        }
+    </script>
+</body>
+</html>

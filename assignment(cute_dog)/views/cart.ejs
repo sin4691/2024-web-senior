@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>장바구니</title>
+    <link rel="stylesheet" href="/main.css">
+</head>
+<body>
+    <%- include('../public/header') %>
+    <div style="width: 40%; margin-left: 35%; ">
+    <h1>장바구니</h1>
+    <div id="cartItems"></div>
+    <button onclick="removeSelectedItems()">선택한 항목 삭제</button>
+    <button onclick="purchaseItems()">구매하기</button>
+    <h2>선택된 항목의 총합: <span id="totalPrice">0</span>원</h2>
+</div>
+    <script>
+        function checkLoginStatus() {
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            if (!isLoggedIn) {
+                alert('로그인이 필요합니다');
+                window.location.href = '/login';
+            }
+        }
+
+        // 로컬 스토리지에서 장바구니 데이터를 가져오는 함수
+        function getCart() {
+            const cart = localStorage.getItem('cart');
+            return cart ? JSON.parse(cart) : [];
+        }
+
+        // 로컬 스토리지에 장바구니 데이터를 저장하는 함수
+        function saveCart(cart) {
+            localStorage.setItem('cart', JSON.stringify(cart));
+        }
+
+        // 장바구니 데이터를 화면에 표시하는 함수
+        function displayCart() {
+            const cart = getCart();
+            const cartItems = document.getElementById('cartItems');
+            cartItems.innerHTML = '';
+
+            if (cart.length === 0) {
+                cartItems.innerHTML = '<p>장바구니에 상품이 없습니다.</p>';
+                return;
+            }
+
+            const selectAllDiv = document.createElement('div');
+            selectAllDiv.innerHTML = `
+                <input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)">
+                <label for="selectAll">모두 선택</label>
+            `;
+            cartItems.appendChild(selectAllDiv);
+
+            cart.forEach((item, index) => {
+                const productDiv = document.createElement('div');
+                productDiv.className = 'cart-item';
+                productDiv.innerHTML = `
+                    <input type="checkbox" class="select-item" data-index="${index}" onchange="updateTotalPrice()">
+                    <img src="${item.image}" alt="${item.name}" style="width: 100px; height: auto; float: left; margin-right: 20px;">
+                    <div style="float: left;">
+                        <p>상품 이름: ${item.name}</p>
+                        <p>상품 ID: ${item.id}</p>
+                        <p>가격: ${item.price}원</p>
+                        <label for="quantity-${index}">수량:</label>
+                        <input type="number" id="quantity-${index}" value="${item.quantity}" min="1" data-index="${index}" onchange="updateQuantity(event)">
+                        <button onclick="removeItem(${index})">삭제</button>
+                    </div>
+                    <div style="clear: both;"></div>
+                `;
+                cartItems.appendChild(productDiv);
+            });
+
+            // 수량 입력 필드의 값이 변경될 때마다 업데이트
+            document.querySelectorAll('input[type="number"]').forEach(input => {
+                input.addEventListener('change', updateQuantity);
+            });
+
+            updateTotalPrice();
+        }
+
+        // 수량을 업데이트하는 함수
+        function updateQuantity(event) {
+            const index = event.target.dataset.index;
+            const quantity = parseInt(event.target.value);
+
+            if (isNaN(quantity) || quantity <= 0) {
+                alert('올바른 수량을 입력해주세요.');
+                return;
+            }
+
+            const cart = getCart();
+            cart[index].quantity = quantity;
+            saveCart(cart);
+            displayCart();
+        }
+
+        // 장바구니에서 상품을 삭제하는 함수
+        function removeItem(index) {
+            const cart = getCart();
+            cart.splice(index, 1);
+            saveCart(cart);
+            displayCart();
+        }
+
+        // 선택된 항목을 삭제하는 함수
+        function removeSelectedItems() {
+            let cart = getCart();
+            const selectedItems = document.querySelectorAll('.select-item:checked');
+            const indexesToRemove = Array.from(selectedItems).map(item => parseInt(item.dataset.index));
+
+            cart = cart.filter((_, index) => !indexesToRemove.includes(index));
+            saveCart(cart);
+            displayCart();
+        }
+
+        // 모두 선택 체크박스를 토글하는 함수
+        function toggleSelectAll(selectAllCheckbox) {
+            const checkboxes = document.querySelectorAll('.select-item');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = selectAllCheckbox.checked;
+            });
+            updateTotalPrice();
+        }
+
+        // 선택된 항목들의 총합을 계산하고 표시하는 함수
+        function updateTotalPrice() {
+            const selectedItems = document.querySelectorAll('.select-item:checked');
+            const cart = getCart();
+            let totalPrice = 0;
+
+            selectedItems.forEach(item => {
+                const index = parseInt(item.dataset.index);
+                const product = cart[index];
+                const price = parseFloat(product.price) || 0;
+                const quantity = parseInt(product.quantity) || 1;
+                totalPrice += price * quantity;
+            });
+
+            document.getElementById('totalPrice').textContent = totalPrice;
+        }
+
+        // 선택된 항목을 구매하는 함수
+        function purchaseItems() {
+            let cart = getCart();
+            const selectedItems = document.querySelectorAll('.select-item:checked');
+            const indexesToPurchase = Array.from(selectedItems).map(item => parseInt(item.dataset.index));
+
+            cart = cart.filter((_, index) => !indexesToPurchase.includes(index));
+            saveCart(cart);
+            alert('구매완료!');
+            displayCart();
+        }
+
+        // 페이지가 로드될 때 장바구니를 표시
+        window.onload = function() {
+            checkLoginStatus();
+            displayCart();
+        };
+    </script>
+    <%- include('../public/footer') %>
+</body>
+</html>
